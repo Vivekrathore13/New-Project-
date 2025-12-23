@@ -12,7 +12,9 @@ import fs, { unlink, unlinkSync } from 'fs'
         if(!localfilepath) return null
         //upload the file on cloudinary
        const response= await cloudinary.uploader.upload(localfilepath,{resource_type:"auto"})
-        console.log("file is uploaded on cloudinary", response.url);
+        // console.log("file is uploaded on cloudinary", response.url);
+        fs.unlinkSync(localfilepath)
+        
         return response;
       } catch(error) {
         fs,unlinkSync(localfilepath)

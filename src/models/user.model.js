@@ -19,7 +19,7 @@ const userSchema= new mongoose.Schema(
       lowercase:true,
       trim:true,
     },
-    fullname:{
+    fullName:{
       type:String,
       required:true,
       trim:true,
@@ -51,13 +51,15 @@ const userSchema= new mongoose.Schema(
 // this time do not use arrow function because its not provided the this context ,aur this keyword power thrn use normal function with async and await because it is time consumeing process
 
 // so writes in this way
-userSchema.pre("save", async function (next) {
-  if(!this.isModified("password")) return next();
-  this.password= await bcrypt.hash(this.password,10)
-  next() // yaha next call karne se yeh problem ayega ki jab bhi koi field save hogi tho phir se pass word set hoga jise complexity badegi aur problem hogi tho 
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
+
+  this.password = await bcrypt.hash(this.password, 10);
+});
+
+// yaha next call karne se yeh problem ayega ki jab bhi koi field save hogi tho phir se pass word set hoga jise complexity badegi aur problem hogi tho 
 
   // jab password mai koi change perform ho tabhi voh change ho new concept and learning
-})
 
 // aur agar mere yeh validate bhi kar degi sahi hai ki nhi mera password ko bcrypt library
 userSchema.methods.isPasswordCorrect=async function(password){
@@ -70,7 +72,7 @@ userSchema.methods.generateAccessToken = function(){
             _id: this._id,
             email: this.email,
             username: this.username,
-            fullname: this.fullName
+            fullName: this.fullName
         },
         process.env.ACCESS_TOKEN_SECRET,
         {
@@ -92,4 +94,4 @@ userSchema.methods.generateRefreshToken = function(){
     )
 }
 
-export const user=mongoose.model("User",userSchema)
+export const User=mongoose.model("User",userSchema)
