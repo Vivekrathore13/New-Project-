@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 const tweetSchema=new mongoose.Schema(
   {
     content:{
-      type:string,
+      type:String,
       required:true
     },
     owner:{
@@ -15,4 +15,4 @@ const tweetSchema=new mongoose.Schema(
 )
 
 
-export const comment=mongoose.model("Tweet",tweetSchema)
+export const Tweet=mongoose.model("Tweet",tweetSchema)

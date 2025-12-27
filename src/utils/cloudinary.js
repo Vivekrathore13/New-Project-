@@ -23,4 +23,21 @@ import fs, { unlink, unlinkSync } from 'fs'
       }
     }
 
-    export {uploadOnCloudinary}
+    const deleteFromCloudinary = async (publicId) => {
+    try {
+        await cloudinary.uploader.destroy(publicId)
+    } catch (error) {
+        console.log("Cloudinary delete error", error)
+    }
+}
+
+
+const getPublicIdFromUrl = (url) => {
+    const parts = url.split("/")
+    const fileName = parts[parts.length - 1]
+    const folder = parts[parts.length - 2]
+    const publicId = `${folder}/${fileName.split(".")[0]}`
+    return publicId
+}
+
+    export {uploadOnCloudinary,deleteFromCloudinary,getPublicIdFromUrl}
