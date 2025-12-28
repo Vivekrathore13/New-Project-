@@ -10,11 +10,12 @@ const likeSchema=new mongoose.Schema(
       type:mongoose.Schema.Types.ObjectId,
       ref:"Comment"
     },
-    likedby:{
+    likedBy:{
       type:mongoose.Schema.Types.ObjectId,
-      ref:"User"
+      ref:"User",
+      required:true
     },
-    likedby:{
+    tweet:{
       type:mongoose.Schema.Types.ObjectId,
       ref:"Tweet"
     }
@@ -24,4 +25,4 @@ const likeSchema=new mongoose.Schema(
 
 
 
-export const comment=mongoose.model("Like",likeSchema)
+export const Like=mongoose.model("Like",likeSchema)
