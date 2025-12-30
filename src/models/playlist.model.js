@@ -8,10 +8,10 @@ const playlistSchema=new mongoose.Schema(
       required:true
     },
     description:{
-      type:string,
+      type:String,
       required:true
     },
-    video:[
+    videos:[
       {
       type:mongoose.Schema.Types.ObjectId,
       ref:"Video"
@@ -25,4 +25,4 @@ const playlistSchema=new mongoose.Schema(
 )
 
 
-export const comment=mongoose.model("Playlist",playlistSchema)
+export const Playlist=mongoose.model("Playlist",playlistSchema)

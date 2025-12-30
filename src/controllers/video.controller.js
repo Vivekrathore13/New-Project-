@@ -150,58 +150,83 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
 
 // ---------------------- GET BY ID ----------------------
-
 const getVideoById = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
 
   if (!videoId) {
     throw new ApiError(404, "Video id is not found");
   }
+  // 👉 add this
+  await Video.findByIdAndUpdate(
+    videoId,
+    { $inc: { views: 1 } },
+    { new: true }
+  );
 
-  const videoget = await Video.aggregate([
-    {
-      $match: {
-        _id: new mongoose.Types.ObjectId(videoId),
-      },
-    },
+  const video = await Video.aggregate([
+    { $match: { _id: new mongoose.Types.ObjectId(videoId) } },
+
+    // Owner
     {
       $lookup: {
         from: "users",
-        foreignField: "_id",
         localField: "owner",
+        foreignField: "_id",
         as: "ownerinfo",
         pipeline: [
           { $project: { username: 1, fullName: 1, avatar: 1 } }
-        ],
-      },
+        ]
+      }
     },
+    { $unwind: "$ownerinfo" },
+
+    // Likes
     {
-      $unwind: {
-        path: "$ownerinfo",
-        preserveNullAndEmptyArrays: true,
-      },
+      $lookup: {
+        from: "likes",
+        localField: "_id",
+        foreignField: "video",
+        as: "likes"
+      }
     },
+
+    // Comments
+    {
+      $lookup: {
+        from: "comments",
+        localField: "_id",
+        foreignField: "video",
+        as: "comments"
+      }
+    },
+
+    // Derived fields
     {
       $addFields: {
+        likeCount: { $size: "$likes" },
+        commentCount: { $size: "$comments" },
+        isLiked: {
+          $in: [
+            new mongoose.Types.ObjectId(req.user._id),
+            "$likes.likedBy"
+          ]
+        },
         username: "$ownerinfo.username",
         fullName: "$ownerinfo.fullName",
-        avatar: "$ownerinfo.avatar",
-      },
+        avatar: "$ownerinfo.avatar"
+      }
     },
-    { $project: { owner: 0 } },
+
+    { $project: { likes: 0, comments: 0, owner: 0 } }
   ]);
 
-  if (!videoget.length) {
+  if (!video.length) {
     throw new ApiError(404, "video not found");
   }
 
-  return res.status(200).json(
-    new ApiResponse(
-      200,
-      { videoget: videoget[0] },
-      "videos are get successfully"
-    )
-  );
+  return res
+    .status(200)
+    .json(new ApiResponse(200, video[0], "Video fetched successfully"));
 });
 
 

@@ -4,6 +4,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { User } from "../models/user.model.js";
+import { Video } from "../models/video.model.js";
 
 const createPlaylist = asyncHandler(async (req, res) => {
   const { name, description } = req.body;
@@ -13,7 +14,7 @@ const createPlaylist = asyncHandler(async (req, res) => {
   if ([name, description].some((field) => field?.trim() === "")) {
     throw new ApiError(400, "All fields are required");
   }
-  const userExist=await User.findById(req.user?._id).select("-password refreshToken")
+  const userExist=await User.findById(req.user?._id).select("-password -refreshToken")
 
   if(!userExist){
     throw new ApiError(404,"User not found")
@@ -187,13 +188,13 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
     throw new ApiError(404,"Video is Not Found")
   }
 
-  const alreadyPresent = ExistPlaylist.videos.includes(videoId);
+ const alreadyPresent = (ExistPlaylist.videos || []).includes(videoId);
+
 
 if (alreadyPresent) {
   throw new ApiError(400, "Video already exists in this playlist");
 }
 
-ExistPlaylist.videos.push(videoId);
 
 await Playlist.findByIdAndUpdate(
   playlistId,
@@ -201,7 +202,6 @@ await Playlist.findByIdAndUpdate(
   { new: true }
 );
 
-await ExistPlaylist.save();
 
 return res.status(200).json(
     new ApiResponse(
